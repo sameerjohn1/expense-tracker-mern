@@ -1,13 +1,13 @@
 import User from "../models/userModel.js";
 import validator from "validator";
-import bacrypt from "bcryptjs";
+import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 
 const JWT_SECRET = process.env.JWT_SECRET;
 const tokenExpiry = "24h";
 
 const createToken = (userId) => {
-  jwt.sign({ id: userId }, JWT_SECRET, { expiresIn: tokenExpiry });
+  return jwt.sign({ id: userId }, JWT_SECRET, { expiresIn: tokenExpiry });
 };
 
 // Register
@@ -37,7 +37,7 @@ export const registerUser = async (req, res) => {
         .json({ success: false, message: "Email already exists" });
     }
 
-    const hashed = await bacrypt.hash(password, 10);
+    const hashed = await bcrypt.hash(password, 10);
     const user = await User.create({ name, email, password: hashed });
     const token = createToken(user._id);
     return res.status(201).json({
@@ -67,7 +67,7 @@ export const loginUser = async (req, res) => {
         .status(400)
         .json({ success: false, message: "Invalid email or password" });
     }
-    const isMatch = await bacrypt.compare(password, user.password);
+    const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
       return res
         .status(400)
@@ -136,37 +136,45 @@ export async function updateUserProfile(req, res) {
 // to change user password
 export async function updatePassword(req, res) {
   const { currentPassword, newPassword } = req.body;
+
   if (!currentPassword || !newPassword || newPassword.length < 8) {
     return res.status(400).json({
       success: false,
-      message: "Password invalid or to short",
+      message: "Password invalid or too short",
     });
   }
 
   try {
-    const user = await User.findById(req.user.id).select("password");
+    const user = await User.findById(req.user.id).select("+password");
+
     if (!user) {
-      return res
-        .status(404)
-        .json({ success: false, message: "User not found" });
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
     }
 
-    const match = await bacrypt.compare(currentPassword, user.password);
+    const match = await bcrypt.compare(currentPassword, user.password);
+
     if (!match) {
-      return res
-        .status(400)
-        .json({ success: false, message: "Current password is incorrect" });
+      return res.status(400).json({
+        success: false,
+        message: "Current password is incorrect",
+      });
     }
 
-    user.password = await bacrypt.hash(newPassword, 10);
+    user.password = await bcrypt.hash(newPassword, 10);
     await user.save();
+
     return res.json({
       success: true,
       message: "Password updated successfully",
     });
   } catch (error) {
-    return res
-      .status(500)
-      .json({ success: false, message: "Internal server error" });
+    console.error(error);
+    return res.status(500).json({
+      success: false,
+      message: "Internal server error",
+    });
   }
 }
