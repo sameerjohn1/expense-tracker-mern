@@ -36,3 +36,22 @@ export async function addIncome(req, res) {
     });
   }
 }
+
+// to get all the income
+export async function getAllIncomes(req, res) {
+  const userId = req.user._id;
+
+  try {
+    const income = await IncomeModel.find({ userId }).sort({ date: -1 });
+    res.status(200).json({
+      success: true,
+      income,
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({
+      success: false,
+      message: "Server error",
+    });
+  }
+}
