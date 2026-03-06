@@ -62,9 +62,43 @@ export const loginUser = async (req, res) => {
   }
   try {
     const user = await User.findOne({ email });
+    if (!user) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Invalid email or password" });
+    }
+    const isMatch = await bacrypt.compare(password, user.password);
+    if (!isMatch) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Invalid email or password" });
+    }
+    const token = createToken(user._id);
+    return res.status(200).json({
+      success: true,
+      token,
+      user: { id: user._id, name: user.name, email: user.email },
+    });
   } catch (error) {
     return res
       .status(500)
       .json({ success: false, message: "Internal server error" });
   }
 };
+
+// to get login user details
+export async function getUserDetails(req, res) {
+  try {
+    const user = await User.findById(req.user.id).select("name email");
+    if (!user) {
+      return res
+        .status(404)
+        .json({ success: false, message: "User not found" });
+    }
+    return res.status(200).json({ success: true, user });
+  } catch (error) {
+    return res
+      .status(500)
+      .json({ success: false, message: "Internal server error" });
+  }
+}
