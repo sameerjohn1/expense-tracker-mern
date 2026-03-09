@@ -55,3 +55,65 @@ export async function getAllIncomes(req, res) {
     });
   }
 }
+
+// update income
+export async function updateIncome(req, res) {
+  const { id } = req.params;
+  const userId = req.user._id;
+  const { description, amount } = req.body;
+
+  try {
+    const updatedIncome = await IncomeModel.findOneAndUpdate(
+      {
+        _id: id,
+        userId,
+      },
+      { description, amount },
+      { new: true },
+    );
+
+    if (!updatedIncome) {
+      return res.status(404).json({
+        success: false,
+        message: "Income not found",
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      message: "Income updated successfully",
+      data: updatedIncome,
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({
+      success: false,
+      message: "Server error",
+    });
+  }
+}
+
+// to delete an income
+export async function deleteIncome(req, res) {
+  try {
+    const income = await IncomeModel.findByIdAndDelete({ _id: req.params.id });
+
+    if (!income) {
+      return res.status(404).json({
+        success: false,
+        message: "Income not found",
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: "Income deleted successfully",
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({
+      success: false,
+      message: "Server error",
+    });
+  }
+}
