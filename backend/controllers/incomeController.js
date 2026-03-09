@@ -156,7 +156,7 @@ export async function getIncomeOverview(req, res) {
     const { range = "monthly" } = req.query;
     const { start, end } = getDateRange(range);
 
-    const income = await incomeModel
+    const incomes = await incomeModel
       .find({
         userId,
         date: { $gte: start, $lte: end },
