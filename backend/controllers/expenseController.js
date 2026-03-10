@@ -26,7 +26,7 @@ export async function addExpense(req, res) {
     res.status(201).json({
       success: true,
       message: "Expense added successfully",
-      income: newExpense,
+      expense: newExpense,
     });
   } catch (error) {
     return res.status(500).json({
@@ -112,6 +112,33 @@ export async function deleteExpense(req, res) {
     });
   } catch (error) {
     console.log(error);
+    res.status(500).json({
+      success: false,
+      message: "Server error",
+    });
+  }
+}
+
+// download excel for expense
+export async function downloadExpense(req, res) {
+  const userId = req.user._id;
+
+  try {
+    const expense = await expenseModel.find({ userId }).sort({ date: -1 });
+    const plainData = expense.map((exp) => ({
+      Description: exp.description,
+      Amount: exp.amount,
+      Category: exp.category,
+      Date: new Date(exp.date).toLocaleDateString(),
+    }));
+
+    const worksheet = XLSX.utils.json_to_sheet(plainData);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "expenseModel");
+    XLSX.writeFile(workbook, "expense_details.xlsx");
+    res.download("expense_details.xlsx");
+  } catch (error) {
+    console.error(error);
     res.status(500).json({
       success: false,
       message: "Server error",
