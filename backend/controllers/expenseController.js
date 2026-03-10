@@ -1,5 +1,6 @@
 import expenseModel from "../models/expenseModel.js";
 import getDateRange from "../utils/dateFilter.js";
+import XLSX from "xlsx";
 
 // add expense
 export async function addExpense(req, res) {
@@ -137,6 +138,45 @@ export async function downloadExpense(req, res) {
     XLSX.utils.book_append_sheet(workbook, worksheet, "expenseModel");
     XLSX.writeFile(workbook, "expense_details.xlsx");
     res.download("expense_details.xlsx");
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      success: false,
+      message: "Server error",
+    });
+  }
+}
+
+// to get overview of expense
+export async function getExpenseOverview(req, res) {
+  try {
+    const userId = req.user._id;
+    const { range = "monthly" } = req.query;
+    const { start, end } = getDateRange(range);
+
+    const expense = await expenseModel
+      .find({
+        userId,
+        date: { $gte: start, $lte: end },
+      })
+      .sort({ date: -1 });
+
+    const totalExpense = expense.reduce((acc, cur) => acc + cur.amount, 0);
+    const averageExpense =
+      expense.length > 0 ? totalExpense / expense.length : 0;
+    const numberOfTransactions = expense.length;
+    const recentTransactions = expense.slice(0, 5);
+
+    res.status(200).json({
+      success: true,
+      data: {
+        totalExpense,
+        averageExpense,
+        numberOfTransactions,
+        recentTransactions,
+        range,
+      },
+    });
   } catch (error) {
     console.error(error);
     res.status(500).json({
