@@ -1,0 +1,37 @@
+import expenseModel from "../models/expenseModel.js";
+import getDateRange from "../utils/dateFilter.js";
+
+// add expense
+export async function addExpense(req, res) {
+  const userId = req.user._id;
+  const { description, amount, category, date } = req.body;
+
+  try {
+    if (!description || !amount || !category || !date) {
+      return res.status(400).json({
+        success: false,
+        message: "All fields are required",
+      });
+    }
+    const newExpense = new expenseModel({
+      userId,
+      description,
+      amount,
+      category,
+      date: new Date(date),
+    });
+
+    await newExpense.save();
+
+    res.status(201).json({
+      success: true,
+      message: "Expense added successfully",
+      income: newExpense,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: "Server error",
+    });
+  }
+}
