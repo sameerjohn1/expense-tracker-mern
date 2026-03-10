@@ -54,3 +54,40 @@ export async function getAllExpense(req, res) {
     });
   }
 }
+
+// to update the expense
+export async function updateExpense(req, res) {
+  const { id } = req.params;
+  const userId = req.user._id;
+  const { description, amount } = req.body;
+
+  try {
+    const updatedExpense = await expenseModel.findOneAndUpdate(
+      {
+        _id: id,
+        userId,
+      },
+      { description, amount },
+      { new: true },
+    );
+
+    if (!updatedExpense) {
+      return res.status(404).json({
+        success: false,
+        message: "Expense not found",
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      message: "Expense updated successfully",
+      data: updatedExpense,
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({
+      success: false,
+      message: "Server error",
+    });
+  }
+}
