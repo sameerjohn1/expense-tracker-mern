@@ -91,3 +91,30 @@ export async function updateExpense(req, res) {
     });
   }
 }
+
+// to delete the expense
+export async function deleteExpense(req, res) {
+  try {
+    const expense = await expenseModel.findByIdAndDelete({
+      _id: req.params.id,
+    });
+
+    if (!expense) {
+      return res.status(404).json({
+        success: false,
+        message: "Expense not found",
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: "Expense deleted successfully",
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({
+      success: false,
+      message: "Server error",
+    });
+  }
+}
