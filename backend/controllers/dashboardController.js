@@ -1,5 +1,5 @@
 import incomeModel from "../models/incomeModel.js";
-import exprenseModel from "../models/expenseModel.js";
+import expenseModel from "../models/expenseModel.js";
 
 export async function getDashboardOverview(req, res) {
   const userId = req.user._id;
@@ -7,19 +7,22 @@ export async function getDashboardOverview(req, res) {
   const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
 
   try {
+    console.log("Fetching dashboard for userId:", userId);
     const incomes = await incomeModel
       .find({
         userId,
-        date: { $gte: startOfMonth, $lte: now },
       })
       .lean();
 
-    const expenses = await exprenseModel
+    const expenses = await expenseModel
       .find({
         userId,
-        date: { $gte: startOfMonth, $lte: now },
       })
       .lean();
+
+    console.log(
+      `Found ${incomes.length} incomes and ${expenses.length} expenses`,
+    );
 
     const monthlyIncome = incomes.reduce(
       (acc, cur) => acc + Number(cur.amount || 0),
@@ -36,7 +39,11 @@ export async function getDashboardOverview(req, res) {
     const recentTransactions = [
       ...incomes.map((i) => ({ ...i, type: "income" })),
       ...expenses.map((e) => ({ ...e, type: "expense" })),
-    ].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+    ].sort((a, b) => {
+      const dateA = new Date(b.date || b.createdAt || 0);
+      const dateB = new Date(a.date || a.createdAt || 0);
+      return dateA - dateB;
+    });
 
     const spendByCategory = {};
     for (const exp of expenses) {
