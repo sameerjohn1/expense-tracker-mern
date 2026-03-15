@@ -17,29 +17,6 @@ const Navbar = ({ user: propUser, onLogout }) => {
     email: "",
   };
 
-  //   to fetch the user data from server
-  useEffect(() => {
-    const fetchUserData = async () => {
-      try {
-        const token = localStorage.getItem("token");
-        if (!token) return;
-
-        const response = await axios.get(`${BASE_URL}/user/me`, {
-          header: { Authorization: `Bearer ${token}` },
-        });
-
-        const userData = response.data.user || response.data;
-        setUser(userData);
-      } catch (error) {
-        console.error("Failed to load profile", error);
-      }
-
-      if (!propUser) {
-        fetchUserData();
-      }
-    };
-  }, [propUser]);
-
   const toggleMenu = () => setMenuOpen((prev) => !prev);
 
   const handleLogout = () => {
