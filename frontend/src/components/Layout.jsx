@@ -433,7 +433,7 @@ const Layout = ({ onLogout, user }) => {
 
           {/* right side */}
           <div className={styles.grid.rightColumn}>
-            <div className={`${styles.cards.base} h-full`}>
+            <div className={`${styles.cards.base} `}>
               <div className={styles.transactions.cardHeader}>
                 <h3 className={styles.transactions.cardTitle}>
                   <Clock className="w-6 h-6 text-purple-500" />
