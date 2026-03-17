@@ -52,10 +52,10 @@ const filterTransactions = (transactions, frame) => {
       startOfWeek.setDate(startOfWeek.getDate() - startOfWeek.getDay());
       return transactions.filter((t) => new Date(t.date) >= startOfWeek);
     }
-    case "monthly":
-      return transactions.filter(
-        (t) => new Date(t.date).getMonth() === now.getMonth(),
-      );
+    case "monthly": {
+      const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+      return transactions.filter((t) => new Date(t.date) >= startOfMonth);
+    }
     default:
       return transactions;
   }
@@ -66,8 +66,10 @@ const safeArrayFromResponse = (res) => {
   if (!body) return [];
   if (Array.isArray(body)) return body;
   if (Array.isArray(body.data)) return body.data;
-  if (Array.isArray(body.incomes)) return body.incomes;
-  if (Array.isArray(body.expenses)) return body.expenses;
+  if (Array.isArray(body.incomes) || Array.isArray(body.income))
+    return body.incomes || body.income;
+  if (Array.isArray(body.expenses) || Array.isArray(body.expense))
+    return body.expenses || body.expense;
   return [];
 };
 
@@ -433,7 +435,7 @@ const Layout = ({ onLogout, user }) => {
 
           {/* right side */}
           <div className={styles.grid.rightColumn}>
-            <div className={`${styles.cards.base} h-full`}>
+            <div className={`${styles.cards.base} `}>
               <div className={styles.transactions.cardHeader}>
                 <h3 className={styles.transactions.cardTitle}>
                   <Clock className="w-6 h-6 text-purple-500" />
