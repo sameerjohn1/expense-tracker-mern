@@ -11,12 +11,14 @@ export async function getDashboardOverview(req, res) {
     const incomes = await incomeModel
       .find({
         userId,
+        date: { $gte: startOfMonth },
       })
       .lean();
 
     const expenses = await expenseModel
       .find({
         userId,
+        date: { $gte: startOfMonth },
       })
       .lean();
 
