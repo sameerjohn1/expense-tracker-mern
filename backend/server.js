@@ -8,7 +8,7 @@ import expenseRouter from "./routes/expenseRoutes.js";
 import dashboardRouter from "./routes/dashboardRoute.js";
 
 const app = express();
-const port = process.env.PORT || 4000;
+const Port = process.env.PORT || 4000;
 
 // MIDDLEWARE
 app.use(cors());
@@ -28,6 +28,6 @@ app.get("/", (req, res) => {
   res.send("Hello World!");
 });
 
-app.listen(port, () => {
-  console.log(`Server is running on port ${port}`);
+app.listen(Port, () => {
+  console.log(`Server is running on Port ${Port}`);
 });
