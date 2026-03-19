@@ -44,7 +44,7 @@ import {
 } from "recharts";
 import AddTransactionModal from "../components/Add.jsx";
 
-const API_URL = "http://localhost:4000/api";
+const API_URL = import.meta.env.VITE_BACKEND_URL;
 
 const getAuthHeader = () => {
   const token =
