@@ -539,7 +539,7 @@ const Layout = ({ onLogout, user }) => {
               </h3>
 
               <div className={styles.categories.list}>
-                {topCategories.map((category, amount) => (
+                {topCategories.map(([category, amount]) => (
                   <div
                     key={category}
                     className={styles.categories.categoryItem}
@@ -558,7 +558,7 @@ const Layout = ({ onLogout, user }) => {
                     </div>
 
                     <span className={styles.categories.categoryAmount}>
-                      ${amount}
+                      ${Number(amount).toLocaleString()}
                     </span>
                   </div>
                 ))}
